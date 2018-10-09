@@ -11,12 +11,15 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.contrib.rnn import BasicRNNCell, LSTMCell
 from tensorflow.python.ops.rnn import bidirectional_dynamic_rnn
+import numpy as np
 
 
 class BaselineModel():
     def __init__(self, config):
         self.config = config
         self.train_graph = tf.Graph()
+        self.sess = tf.Session()
+        self.saver = tf.train.Saver()
 
     def build_train_graph(self):
         self.init_train_placeholder()
@@ -26,7 +29,7 @@ class BaselineModel():
             self.input_token_ids = tf.placeholder(dtype=tf.float32, shape=[None, self.config.token_max_len],
                                                   name='input_placeholder')
             self.input_seqs_len = tf.placeholder(dtype=tf.int32, shape=[None, None], name='input_seq_len')
-            self.input_label_ids = tf.placeholder(dtype=tf.int32, shape=[None, 20])
+            self.input_label_ids = tf.placeholder(dtype=tf.int32, shape=[None, 4])
 
     def init_train_embedding(self):
         with self.train_graph.as_default(), tf.name_scope('init_train_embedding'):
@@ -57,30 +60,37 @@ class BaselineModel():
                                     name='proj_weight')
                 b = tf.get_variable(dtype=tf.float32, shape=[self.config.n_labels], name='proj_bias')
 
-# import numpy as np
-#
-# pad_sequences = keras.preprocessing.sequence.pad_sequences
-#
-# # a = np.random.normal(0,1, (3,4))
-# a = np.array([[1,23,4],[23,6346,7676,9890,112]])
-# print(a)
-# b_len = np.array([len(_) for _ in a])
-# print(b_len)
-# b_padded = pad_sequences(sequences=a,maxlen=3)
-# print(b_padded)
-# b_padded = pad_sequences(sequences=a,maxlen=2)
-# print(b_padded)
-# b_padded = pad_sequences(sequences=a,maxlen=4)
-# print(b_padded)
-#
-# b_padded = pad_sequences(sequences=a,maxlen=6)
-# print(b_padded)
-#
-# b_padded = pad_sequences(sequences=a,maxlen=10,padding='post')
-# print(b_padded)
-#
-# b_padded = pad_sequences(sequences=a,maxlen=10,padding='post',value=999)
-# print(b_padded)
-#
-# b_padded = pad_sequences(sequences=a,maxlen=10,padding='pre',value=999)
-# print(b_padded)
+                self.train_logits = tf.nn.softmax(tf.matmul(self.bi_rnn_output, W) + b)  # batch_size * n_labels
+
+    def init_train_loss(self):
+        with self.train_graph.as_default():
+            with tf.name_scope('init_train_loss'):
+                self.train_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(lables=self.input_label_ids,
+                                                                                 logits=self.train_logits)
+
+    def init_predict(self):
+        with self.train_graph.as_default():
+            with tf.name_scope('init_predict'):
+                self.predicts = tf.argmax(self.train_logits, axis=-1)
+
+    def init_train_eval(self, val):
+        with self.train_graph.as_default():
+            with tf.name_scope('init_train_eval'):
+                accuracy = 0
+                n_total = len(val)
+                for token_ids, labels in val:
+                    predict = self.sess.run([self.predicts], feed_dict={self.input_token_ids: token_ids})
+                    labels = np.argmax(labels, axis=1)
+                    for single_predict, single_label in zip(predict, labels):
+                        if single_predict == single_label:
+                            accuracy += 1
+                accuracy /= n_total
+
+        return accuracy
+
+
+
+
+
+
+

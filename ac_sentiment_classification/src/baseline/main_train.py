@@ -4,6 +4,6 @@
 """ 
 __author__ : chenxiang 
 __email__ : alfredchenxiang@didichuxing.com
-__file_name__ : __init__.py.py 
+__file_name__ : main_train.py 
 __create_time__ : 2018/10/09 
 """  

@@ -5,8 +5,9 @@
       <sourceFolder url="file://$MODULE_DIR$" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/ac_sentiment_classification" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/ac_sentiment_classification/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/ac_sentiment_classification/src/own" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/ac_sentiment_classification/src/imdb" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/ac_sentiment_classification/src/baseline" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/imdb" isTestSource="false" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.6" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
